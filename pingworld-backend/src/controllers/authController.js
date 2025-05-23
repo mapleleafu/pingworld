@@ -1,0 +1,55 @@
+import ApiResponse from "../models/apiResponse.js";
+import { registerUser, loginUser, setRefreshTokenCookie, refreshUserTokens, getUserById } from "../services/authService.js";
+
+const login = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const authData = await loginUser(email, password);
+
+    setRefreshTokenCookie(res, authData.refreshToken);
+
+    res.json(
+      ApiResponse.Success({
+        message: "Successfully logged in.",
+        user: authData.userResponseData,
+        accessToken: authData.accessToken,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const register = async (req, res, next) => {
+  const { email, name, password } = req.body;
+
+  try {
+    const newUser = await registerUser(email, name, password);
+    res.json(ApiResponse.Success({ message: "Successfully registered.", user: newUser }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+const handleRefreshToken = async (req, res, next) => {
+  const tokenFromCookie = req.cookies.refreshToken;
+
+  try {
+    const newTokens = await refreshUserTokens(tokenFromCookie);
+    res.json(
+      ApiResponse.Success({
+        message: "Access token refreshed successfully.",
+        accessToken: newTokens.accessToken,
+      })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+const profile = async (req, res, next) => {
+  const user = await getUserById(req.user.id);
+  res.json(ApiResponse.Success({ message: "Successfully retrieved the user.", user }));
+};
+
+export { login, register, profile, handleRefreshToken };

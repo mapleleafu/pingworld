@@ -1,4 +1,3 @@
-// This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
@@ -9,4 +8,13 @@ generator client {
 datasource db {
   provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @unique @default(uuid())
+  tokens_valid_from DateTime @default(now())
+  created_at        DateTime @default(now())
+  name              String?
+  email             String   @unique
+  password          String
 }
