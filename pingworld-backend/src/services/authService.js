@@ -97,27 +97,36 @@ async function loginUser(email, password) {
   return { userResponseData, accessToken, refreshToken };
 }
 
-async function registerUser(email, name, password) {
+async function registerUser(email, name, password, tempUserId = null) {
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   try {
+    const userData = {
+      email,
+      name,
+      password: hashedPassword,
+    };
+    if (tempUserId) {
+      userData.temp_user_id = tempUserId;
+    }
+
     const user = await prisma.user.create({
-      data: {
-        email,
-        name,
-        password: hashedPassword,
-      },
+      data: userData,
       select: {
         id: true,
         email: true,
         name: true,
       },
     });
+
     return user;
   } catch (dbError) {
     if (dbError.code === "P2002" && dbError.meta?.target?.includes("email")) {
       throw ApiResponse.BadRequestError("This email address is already registered.");
+    }
+    if (dbError.code === "P2002" && dbError.meta?.target?.includes("temp_user_id")) {
+        throw ApiResponse.BadRequestError("This temporary ID has already been associated with an account.");
     }
     throw dbError;
   }
