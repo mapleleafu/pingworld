@@ -6,9 +6,13 @@ import ApiResponse from "./models/apiResponse.js";
 import errorMiddleware from "./middlewares/errorMiddleware.js";
 import authRoutes from "./routes/authRoutes.js";
 import prisma from "./config/prisma.js";
+import http from "http";
+import { setupSocketIO } from "./config/socketSetup.js";
+import { loadAndCacheAchievements } from "./services/achievementService.js";
 
 const app = express();
 const port = process.env.PORT || 3001;
+const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [];
 dotenv.config();
 
 app.use(
@@ -30,7 +34,7 @@ app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.use('/api/v1/', authRoutes);
+app.use("/api/v1/", authRoutes);
 
 app.use((error, req, res, next) => {
   if (error instanceof SyntaxError && error.status === 400 && "body" in error) {
@@ -41,37 +45,47 @@ app.use((error, req, res, next) => {
 
 app.use(errorMiddleware);
 
-const server = app.listen(port, () => {
+await loadAndCacheAchievements();
+const httpServer = http.createServer(app);
+const io = setupSocketIO(httpServer);
+
+httpServer.listen(port, () => {
   console.log(`Server started on: http://localhost:${port}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
 });
 
-async function gracefulShutdown() {
-  console.log('Attempting graceful shutdown...');
-  try {
-    server.close(async (err) => {
+async function gracefulShutdown(signal) {
+  console.log(`${signal} signal received: Starting graceful shutdown...`);
+
+  io.close(async () => {
+    console.log("Socket.IO server closed.");
+
+    httpServer.close(async (err) => {
       if (err) {
-        console.error('Error closing HTTP server:', err);
-        process.exit(1);
+        if (err.code !== "ERR_SERVER_NOT_RUNNING") console.error("Error during HTTP server close:", err);
+        process.exitCode = 1;
       }
-      console.log('HTTP server closed.');
+      console.log("HTTP server closed.");
 
-      await prisma.$disconnect();
-      console.log('Prisma client disconnected.');
-      process.exit(0);
+      try {
+        await prisma.$disconnect();
+        console.log("Prisma client disconnected.");
+      } catch (e) {
+        console.error("Error disconnecting Prisma:", e);
+        if (!process.exitCode) process.exitCode = 1;
+      }
+
+      console.log("Graceful shutdown completed.");
+      process.exit();
     });
+  });
 
-    // If server.close doesn't exit after a timeout, force exit
-    setTimeout(() => {
-      console.error('Could not close connections in time, forcefully shutting down');
-      process.exit(1);
-    }, 10000); // 10 seconds timeout
-
-  } catch (e) {
-    console.error('Error during graceful shutdown:', e);
-    process.exit(1);
-  }
+  // If server hasn't finished shutting down in X seconds, force exit
+  setTimeout(() => {
+    console.error("Graceful shutdown timed out. Forcefully exiting.");
+    process.exit(1); // Force exit with error
+  }, 10000); // 10 seconds
 }
 
-process.on("SIGINT", gracefulShutdown);
-process.on("SIGTERM", gracefulShutdown);
+process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
