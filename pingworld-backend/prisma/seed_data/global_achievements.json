@@ -1,0 +1,37 @@
+[
+  {
+    "name": "Global Pioneer: 1st Ping",
+    "description": "This was the 1st ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 1 },
+    "is_personal": false
+  },
+  {
+    "name": "Global Pioneer: 5th Ping",
+    "description": "This was the 5th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 5 },
+    "is_personal": false
+  },
+  {
+    "name": "Global Pioneer: 10th Ping",
+    "description": "This was the 10th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 10 },
+    "is_personal": false
+  },
+  {
+    "name": "Global Pioneer: 100th Ping",
+    "description": "This was the 100th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 100 },
+    "is_personal": false
+  },
+  {
+    "name": "Global Landmark: 1000th Ping",
+    "description": "The 1000th ping on the platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 1000 },
+    "is_personal": false
+  }
+]

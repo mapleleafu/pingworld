@@ -144,3 +144,4 @@ dist
 *.db
 src/generated
 .vscode
+*test*

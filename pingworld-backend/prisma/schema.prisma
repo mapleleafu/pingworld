@@ -11,10 +11,67 @@ datasource db {
 }
 
 model User {
-  id                String   @id @unique @default(uuid())
-  tokens_valid_from DateTime @default(now())
-  created_at        DateTime @default(now())
+  id                String            @id @unique @default(uuid())
+  temp_user_id      String?           @unique
+  tokens_valid_from DateTime?         @default(now())
+  created_at        DateTime          @default(now())
   name              String?
-  email             String   @unique
+  email             String            @unique
   password          String
+  pings             Ping[]
+  achievements      UserAchievement[]
+}
+
+model Ping {
+  id                  String   @id @default(uuid())
+  latitude            Float
+  longitude           Float
+  timestamp           DateTime @default(now())
+  // country             String
+  is_consecutive_ping Boolean  @default(false)
+  is_anon_user        Boolean  @default(false)
+  user_ip             String?
+
+  user_id String?
+  user    User?   @relation(fields: [user_id], references: [id])
+
+  temp_user_id String?
+
+  achievements_earned UserAchievement[]
+
+  @@index([user_id])
+  @@index([temp_user_id])
+  @@index([timestamp])
+}
+
+model Achievement {
+  id          String            @id @unique @default(uuid())
+  name        String            @unique
+  description String
+  type        String // e.g., "REGIONAL_COUNT", "GLOBAL_COUNT", "PERSONAL_COUNT"
+  criteria    Json // e.g., { region: "EU", count: 1 } or { region: "EU", count: 10 }
+  is_personal Boolean           @default(false)
+  users       UserAchievement[]
+  created_at  DateTime          @default(now())
+}
+
+model UserAchievement {
+  id             String      @id @unique @default(uuid())
+  user_id        String?
+  temp_user_id   String?
+  user           User?       @relation(fields: [user_id], references: [id])
+  achievement_id String
+  achievement    Achievement @relation(fields: [achievement_id], references: [id])
+  created_at     DateTime    @default(now())
+  ping_id        String
+  ping           Ping        @relation(fields: [ping_id], references: [id])
+
+  @@unique([user_id, achievement_id]) // User can earn an achievement only once
+  @@index([ping_id])
+}
+
+model SystemCounter {
+  name       String   @id @unique // e.g., "global_ping_total", "pings_country_DE"
+  value      Int      @default(0)
+  updated_at DateTime @updatedAt
 }

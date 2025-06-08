@@ -1,0 +1,30 @@
+[
+  {
+    "name": "First Ping!",
+    "description": "Your very first ping on the map.",
+    "type": "PERSONAL_COUNT",
+    "criteria": { "count": 1 },
+    "is_personal": true
+  },
+  {
+    "name": "Ping Enthusiast",
+    "description": "You've made 5 pings.",
+    "type": "PERSONAL_COUNT",
+    "criteria": { "count": 5 },
+    "is_personal": true
+  },
+  {
+    "name": "Ping Enthusiast",
+    "description": "You've made 10 pings.",
+    "type": "PERSONAL_COUNT",
+    "criteria": { "count": 10 },
+    "is_personal": true
+  },
+  {
+    "name": "Serial Pinger",
+    "description": "You've made 100 pings!",
+    "type": "PERSONAL_COUNT",
+    "criteria": { "count": 100 },
+    "is_personal": true
+  }
+]
