@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const registerSchema = z.object({
   body: z.object({
-    name: z.string({ required_error: "Name is required." }).min(1, { message: "Name cannot be empty." }),
+    user_name: z.string({ required_error: "User name is required." }).min(1, { message: "User name cannot be empty." }),
     email: z.string({ required_error: "Email is required." }).email({ message: "Invalid email format." }),
     password: z
       .string({ required_error: "Password is required." })

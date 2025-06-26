@@ -4,34 +4,79 @@
     "description": "This was the 1st ping across the entire platform!",
     "type": "GLOBAL_COUNT",
     "criteria": { "count": 1 },
-    "is_personal": false
+    "is_personal": false,
+    "rarity": "legendary"
   },
   {
     "name": "Global Pioneer: 5th Ping",
     "description": "This was the 5th ping across the entire platform!",
     "type": "GLOBAL_COUNT",
     "criteria": { "count": 5 },
-    "is_personal": false
+    "is_personal": false,
+    "rarity": "epic"
   },
   {
     "name": "Global Pioneer: 10th Ping",
     "description": "This was the 10th ping across the entire platform!",
     "type": "GLOBAL_COUNT",
     "criteria": { "count": 10 },
-    "is_personal": false
+    "is_personal": false,
+    "rarity": "epic"
+  },
+  {
+    "name": "Global Pioneer: 50th Ping",
+    "description": "This was the 50th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 50 },
+    "is_personal": false,
+    "rarity": "epic"
   },
   {
     "name": "Global Pioneer: 100th Ping",
     "description": "This was the 100th ping across the entire platform!",
     "type": "GLOBAL_COUNT",
     "criteria": { "count": 100 },
-    "is_personal": false
+    "is_personal": false,
+    "rarity": "legendary"
+  },
+  {
+    "name": "Global Pioneer: 200th Ping",
+    "description": "This was the 200th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 200 },
+    "is_personal": false,
+    "rarity": "legendary"
+  },
+  {
+    "name": "Global Pioneer: 300th Ping",
+    "description": "This was the 300th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 300 },
+    "is_personal": false,
+    "rarity": "legendary"
+  },
+  {
+    "name": "Global Pioneer: 400th Ping",
+    "description": "This was the 400th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 400 },
+    "is_personal": false,
+    "rarity": "legendary"
+  },
+  {
+    "name": "Global Pioneer: 500th Ping",
+    "description": "This was the 500th ping across the entire platform!",
+    "type": "GLOBAL_COUNT",
+    "criteria": { "count": 500 },
+    "is_personal": false,
+    "rarity": "legendary"
   },
   {
     "name": "Global Landmark: 1000th Ping",
     "description": "The 1000th ping on the platform!",
     "type": "GLOBAL_COUNT",
     "criteria": { "count": 1000 },
-    "is_personal": false
+    "is_personal": false,
+    "rarity": "legendary"
   }
 ]

@@ -1,19 +1,28 @@
 import { processAndSavePing } from "../services/pingService.js";
-import { pingSchema } from "../validations/pingSchemas.js";
 import { ZodError } from "zod";
+import locateUserLocation from "../utils/locateUserLocation.js";
+import ApiResponse from "../models/apiResponse.js";
+import determineUserIp from "../utils/determineUserIp.js";
 
-export async function handleNewPing(socket, io, pingData) {
-  console.log(`Received newPing from ${socket.id}:`, pingData);
+export async function handleNewPing(socket, io) {
+  console.log(`Received newPing from ${socket.id}:`);
   try {
-    const validatedData = pingSchema.parse(pingData);
-    let { latitude, longitude } = validatedData;
-
     const userId = socket.user ? socket.user.id : null;
     const tempUserId = !socket.user && socket.temp_user_id ? socket.temp_user_id : null;
+    const userIp = determineUserIp(socket);
+    const userName = socket?.user?.user_name || "Anonymous";
+    let latitude, longitude, country, continent;
+
+    if (userIp) {
+      ({ latitude, longitude, country, continent } = locateUserLocation(userIp));
+    } else {
+      throw ApiResponse.BadRequestError("User IP address is not available.");
+    }
 
     const pingToBroadcast = {
-      latitude: latitude,
-      longitude: longitude,
+      latitude,
+      longitude,
+      timestamp: Date.now(),
     };
 
     io.emit("pingUpdate", pingToBroadcast);
@@ -23,8 +32,9 @@ export async function handleNewPing(socket, io, pingData) {
       longitude,
       userId,
       tempUserId,
-      clientIp: socket.handshake.address,
+      clientIp: userIp,
       io,
+      userName,
     }).catch((dbError) => {
       console.error(`Failed to save ping from ${socket.id} to DB:`, dbError.message);
     });

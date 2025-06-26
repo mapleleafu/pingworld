@@ -26,10 +26,9 @@ async function isConsecutivePing(userId = null, tempUserId = null) {
   return !!lastPing;
 }
 
-async function processAndSavePing({ latitude, longitude, userId, tempUserId, clientIp, io }) {
+async function processAndSavePing({ latitude, longitude, userId, tempUserId, clientIp, io, userName }) {
   const isAnonUser = !userId && !!tempUserId;
   let awardedData = null;
-  // TODO: Country determination
 
   try {
     const [pingSaveResult, _] = await Promise.all([
@@ -39,7 +38,7 @@ async function processAndSavePing({ latitude, longitude, userId, tempUserId, cli
 
     const { newPing, skipAchievementCheck } = pingSaveResult;
     if (!skipAchievementCheck) {
-      awardedData = await checkAndAwardAchievements(newPing, io);
+      awardedData = await checkAndAwardAchievements(newPing, io, userName);
     }
 
     return { newPing, awardedData };

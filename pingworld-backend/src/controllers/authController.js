@@ -21,10 +21,10 @@ const login = async (req, res, next) => {
 };
 
 const register = async (req, res, next) => {
-  const { email, name, password, tempUserId } = req.body;
+  const { email, user_name, password, tempUserId } = req.body;
 
   try {
-    const newUser = await registerUser(email, name, password, tempUserId);
+    const newUser = await registerUser(email, user_name, password, tempUserId);
     res.json(ApiResponse.Success({ message: "Successfully registered.", user: newUser }));
   } catch (error) {
     next(error);

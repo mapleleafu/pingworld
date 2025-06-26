@@ -19,7 +19,7 @@ export async function reloadAchievements() {
   await loadAndCacheAchievements();
 }
 
-async function getGlobalPingCount() {
+export async function getGlobalPingCount() {
   const counter = await prisma.systemCounter.findUnique({
     where: { name: "global_ping_total" },
   });
@@ -33,7 +33,7 @@ async function getPingsCountInCountry(countryCode) {
   return counter ? counter.value : 0;
 }
 
-export async function checkAndAwardAchievements(pingData, io) {
+export async function checkAndAwardAchievements(pingData, io, userName) {
   if (!ACHIEVEMENTS_LOADED) {
     console.warn("Achievement definitions not loaded. Attempting to load now.");
     await loadAndCacheAchievements();
@@ -106,7 +106,8 @@ export async function checkAndAwardAchievements(pingData, io) {
         id: achievement.id,
         name: achievement.name,
         description: achievement.description,
-        isPersonal: achievement.is_personal ? true : false,
+        isPersonal: achievement.is_personal,
+        userName: userName || "Anonymous",
       };
 
       if (userId || tempUserId) {

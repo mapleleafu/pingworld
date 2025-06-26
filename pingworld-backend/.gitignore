@@ -145,3 +145,4 @@ dist
 src/generated
 .vscode
 *test*
+*.mmdb

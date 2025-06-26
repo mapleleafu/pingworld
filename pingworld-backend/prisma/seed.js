@@ -44,6 +44,7 @@ export async function seedAchievements() {
           type: ach.type,
           criteria: ach.criteria,
           is_personal: ach.is_personal,
+          rarity: ach.rarity
         },
         create: {
           name: ach.name,
@@ -51,6 +52,7 @@ export async function seedAchievements() {
           type: ach.type,
           criteria: ach.criteria,
           is_personal: ach.is_personal,
+          rarity: ach.rarity
         },
       });
     } catch (error) {

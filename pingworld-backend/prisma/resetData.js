@@ -3,6 +3,13 @@ import prisma from "../src/config/prisma.js";
 async function flushData() {
   console.log("Starting data flush...");
 
+  // try {
+  //   const deletedAchievements = await prisma.achievement.deleteMany({});
+  //   console.log(`Deleted ${deletedAchievements.count} Achievement records.`);
+  // } catch (error) {
+  //   console.error("Error deleting Achievement records:", error);
+  // }
+
   try {
     const deletedUserAchievements = await prisma.userAchievement.deleteMany({});
     console.log(`Deleted ${deletedUserAchievements.count} UserAchievement records.`);

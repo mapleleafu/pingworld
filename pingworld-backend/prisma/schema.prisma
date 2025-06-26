@@ -15,7 +15,7 @@ model User {
   temp_user_id      String?           @unique
   tokens_valid_from DateTime?         @default(now())
   created_at        DateTime          @default(now())
-  name              String?
+  user_name              String?
   email             String            @unique
   password          String
   pings             Ping[]
@@ -52,6 +52,7 @@ model Achievement {
   criteria    Json // e.g., { region: "EU", count: 1 } or { region: "EU", count: 10 }
   is_personal Boolean           @default(false)
   users       UserAchievement[]
+  rarity      String
   created_at  DateTime          @default(now())
 }
 

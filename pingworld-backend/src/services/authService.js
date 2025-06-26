@@ -60,7 +60,7 @@ async function fetchAndValidateUserForToken(userId, tokenIssuedAtSeconds) {
     select: {
       id: true,
       email: true,
-      name: true,
+      user_name: true,
       tokens_valid_from: true,
     },
   });
@@ -87,24 +87,24 @@ async function loginUser(email, password) {
   const isPasswordMatch = await bcrypt.compare(password, user.password);
   if (!isPasswordMatch) throw ApiResponse.UnAuthorizedError("Invalid email or password.");
 
-  const accessTokenPayload = { id: user.id, email: user.email, name: user.name };
+  const accessTokenPayload = { id: user.id, email: user.email, user_name: user.user_name };
   const refreshTokenPayload = { id: user.id };
 
   const accessToken = await generateAccessToken(accessTokenPayload);
   const refreshToken = await generateRefreshToken(refreshTokenPayload);
 
-  const userResponseData = { id: user.id, email: user.email, name: user.name };
+  const userResponseData = { id: user.id, email: user.email, user_name: user.user_name };
   return { userResponseData, accessToken, refreshToken };
 }
 
-async function registerUser(email, name, password, tempUserId = null) {
+async function registerUser(email, user_name, password, tempUserId = null) {
   const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
   const hashedPassword = await bcrypt.hash(password, saltRounds);
 
   try {
     const userData = {
       email,
-      name,
+      user_name,
       password: hashedPassword,
     };
     if (tempUserId) {
@@ -116,7 +116,7 @@ async function registerUser(email, name, password, tempUserId = null) {
       select: {
         id: true,
         email: true,
-        name: true,
+        user_name: true,
       },
     });
 
@@ -140,7 +140,7 @@ async function getUserById(userId) {
     select: {
       id: true,
       email: true,
-      name: true,
+      user_name: true,
     },
   });
 }

@@ -2,6 +2,10 @@ import { Server } from "socket.io";
 import { handleNewPing } from "../controllers/socketController.js";
 import jsonwebtoken from "jsonwebtoken";
 import { fetchAndValidateUserForToken } from "../services/authService.js";
+import locateUserLocation from "../utils/locateUserLocation.js";
+import ApiResponse from "../models/apiResponse.js";
+import determineUserIp from "../utils/determineUserIp.js";
+import { getGlobalPingCount } from "../services/achievementService.js";
 
 export function setupSocketIO(httpServer) {
   const io = new Server(httpServer, {
@@ -28,7 +32,7 @@ export function setupSocketIO(httpServer) {
     next();
   });
 
-  io.on("connection", (socket) => {
+  io.on("connection", async (socket) => {
     if (socket.user) {
       console.log(`Authenticated user.id "${socket.user.id}" connected: ${socket.id}`);
     } else if (socket.temp_user_id) {
@@ -37,12 +41,29 @@ export function setupSocketIO(httpServer) {
       console.log(`Anonymous user connected: ${socket.id}`);
     }
 
-    socket.on("newPing", (pingData) => {
-      handleNewPing(socket, io, pingData);
+    const userIp = determineUserIp(socket);
+    try {
+      const location = locateUserLocation(userIp);
+      const globalPingCount = await getGlobalPingCount();
+      socket.userLocation = location;
+      socket.emit("userLocation", { latitude: location.latitude, longitude: location.longitude });
+      socket.emit("globalPingCount", globalPingCount);
+    } catch (error) {
+      console.error(`Failed to locate user location for ${socket.id}:`, error.message);
+      throw ApiResponse.BadRequestError("User IP address is not available or invalid.");
+    }
+
+    socket.on("newPing", () => {
+      handleNewPing(socket, io);
     });
 
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.id}`);
+    });
+
+    // Log any other events
+    socket.onAny((event, ...args) => {
+      console.log(`Event "${event}" received from ${socket.id} with args:`, args);
     });
   });
 
