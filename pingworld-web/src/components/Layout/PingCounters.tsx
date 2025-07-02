@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import Counter from "@blocks/Counter/Counter";
+import Counter from "@blocks/Components/Counter/Counter";
 
 let globalSetCount: (value: number) => void;
 let globalCountRef = { current: 0 };
@@ -16,6 +16,10 @@ export const setGlobalPingCount = (value: number) => {
 
 export default function PingCounters() {
   const [globalPingCount, setCount] = useState(0);
+  const dynamicPlaces = Array.from(
+    { length: Math.max(1, Math.ceil(Math.log10(globalPingCount + 1)) + 2) },
+    (_, i) => Math.pow(10, i)
+  ).reverse();
 
   useEffect(() => {
     globalSetCount = setCount;
@@ -24,7 +28,7 @@ export default function PingCounters() {
   return (
     <Counter
       value={globalPingCount}
-      places={[100000, 10000, 1000, 100, 10, 1]}
+      places={dynamicPlaces}
       fontSize={40}
       gap={10}
       containerStyle={{

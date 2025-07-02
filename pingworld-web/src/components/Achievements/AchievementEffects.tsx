@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { Rarity } from "./constants";
 import { ConfettiEffect } from "@UI/Confetti";
+import SplashCursor from "@blocks/Animations/SplashCursor/SplashCursor";
 
 interface Props {
   rarity: Rarity;
@@ -19,15 +20,18 @@ export const AchievementEffects = ({ rarity, isOwnAchievement }: Props) => {
   if (!config) return null;
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: config.opacity }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: config.duration }}
-      className="pointer-events-none fixed inset-0 z-40"
-    >
-      {isOwnAchievement && <ConfettiEffect />}
-      <div className={`absolute inset-0 bg-gradient-to-t ${config.gradient} to-transparent`} />
-    </motion.div>
+    <>
+      <SplashCursor />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: config.opacity }}
+        exit={{ opacity: 0 }}
+        transition={{ duration: config.duration }}
+        className="pointer-events-none fixed inset-0 z-40"
+      >
+        {isOwnAchievement && <ConfettiEffect />}
+        <div className={`absolute inset-0 bg-gradient-to-t ${config.gradient} to-transparent`} />
+      </motion.div>
+    </>
   );
 };

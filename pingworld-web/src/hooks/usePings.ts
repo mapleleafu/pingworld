@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import socketService from "@/services/socket/socketService";
 import { PingData } from "@/services/socket/types";
 import { PING_ANIMATION_DURATION } from "@/components/Map/constants";
-import { incrementGlobalPing } from "@/components/Dashboard/PingCounters";
+import { incrementGlobalPing } from "@/components/Layout/PingCounters";
 
 export const usePings = () => {
   const [activePings, setActivePings] = useState<Map<string, PingData>>(

@@ -16,7 +16,6 @@ export const AchievementCard = ({
   isPersonal,
   isOwnAchievement,
 }: Props) => {
-  console.log("achievement: ", achievement);
   const config = RARITY_CONFIG[achievement.rarity] || RARITY_CONFIG.common;
   const Icon = config.icon;
 

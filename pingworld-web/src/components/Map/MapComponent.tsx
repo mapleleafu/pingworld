@@ -17,15 +17,15 @@ import "ol/ol.css";
 import OLCesium from "olcs/OLCesium";
 import { usePings } from "@/hooks/usePings";
 import { useSocket } from "@/contexts/SocketContext";
-import { MapControls } from "./MapControls";
 import { Achievement } from "@/services/socket/types";
 import socketService from "@/services/socket/socketService";
 import { Rarity } from "../Achievements/constants";
 import { PingData } from "@/services/socket/types";
 import { Loader } from "@/components/UI/Loader";
 import * as MapConstants from "./constants";
-import { setGlobalPingCount } from "@/components/Dashboard/PingCounters";
-import PingCounters from "@/components/Dashboard/PingCounters";
+import { setGlobalPingCount } from "@/components/Layout/PingCounters";
+import PingCounters from "@/components/Layout/PingCounters";
+import MainLayout from "@/components/Layout/MainLayout";
 
 export default function MapComponent() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export default function MapComponent() {
     MapConstants.INITIAL_3D_ENABLED,
   );
   const { activePings } = usePings();
-  const { sendPing, isConnected } = useSocket();
+  const { sendPing, isConnected, isPingDisabled } = useSocket();
   const [isFollowPings, setIsFollowPings] = useState(
     MapConstants.INITIAL_FOLLOW_PINGS,
   );
@@ -109,7 +109,14 @@ export default function MapComponent() {
 
     const map = new Map({
       target: mapRef.current,
-      layers: [new TileLayer({ source: new OSM() }), vectorLayer],
+      layers: [
+        new TileLayer({
+          source: new OSM({
+            url: "https://{a-d}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
+          }),
+        }),
+        vectorLayer,
+      ],
       view: new View({
         center: fromLonLat(MapConstants.INITIAL_LOCATION),
         zoom: MapConstants.INITIAL_ZOOM_LEVEL,
@@ -287,7 +294,6 @@ export default function MapComponent() {
   };
 
   const onTestAchievement = (rarity: Rarity) => {
-    console.log("Testing achievement...");
     const achievement: Achievement = {
       id: `test-${Date.now()}`,
       name: "Test Achievement",
@@ -315,17 +321,15 @@ export default function MapComponent() {
 
   return (
     <div className="fixed inset-0">
-      <MapControls
+      <MainLayout
         onToggle3D={toggle3D}
+        onSendPing={sendPing}
+        onTestAchievement={onTestAchievement}
         onToggleFollowPings={onToggleFollowPings}
-        onSendPing={() => sendPing()}
-        onTestEpicAchievement={() => onTestAchievement("epic")}
-        onTestCommonAchievement={() => onTestAchievement("common")}
-        onTestRareAchievement={() => onTestAchievement("rare")}
-        onTestLegendaryAchievement={() => onTestAchievement("legendary")}
         isFollowPings={isFollowPings}
         isConnected={isConnected}
         is3DEnabled={is3DEnabled}
+        isPingDisabled={isPingDisabled}
       />
       <PingCounters />
       <div ref={mapRef} className="h-full w-full" />
