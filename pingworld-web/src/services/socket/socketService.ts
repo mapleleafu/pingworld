@@ -5,12 +5,13 @@ class SocketService {
   private socket: Socket | null = null;
   private listeners: Map<string, Set<(...args: any[]) => void>> = new Map();
 
-  connect(tempUserId: string) {
+  connect(accessToken: string, tempUserId: string) {
     if (this.socket?.connected) return;
 
+    const authType = accessToken ? { accessToken } : { tempUserId };
     this.socket = io(API_URL, {
       transports: ["websocket"],
-      auth: { tempUserId },
+      auth: authType,
     });
 
     this.listeners.forEach((callbacks, event) => {

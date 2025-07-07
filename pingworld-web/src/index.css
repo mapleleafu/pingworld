@@ -1,6 +1,15 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-text-fill-color: var(--color-foreground);
+  -webkit-box-shadow: 0 0 0px 1000px var(--color-input) inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -49,15 +58,15 @@
 }
 
 .ol-attribution.ol-uncollapsible {
-    display: none !important;
+  display: none !important;
 }
 
 .cesium-credit-logoContainer {
-    display: none !important;
+  display: none !important;
 }
 
 .cesium-credit-textContainer {
-    display: none !important;
+  display: none !important;
 }
 
 @theme inline {
@@ -140,4 +149,3 @@
     @apply bg-background text-foreground;
   }
 }
-

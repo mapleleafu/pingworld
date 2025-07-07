@@ -1,5 +1,4 @@
 import Auth from "@/components/Layout/Auth";
-import SocketService from "@/services/socket/socketService";
 import Dock from "@/blocks/Components/Dock/Dock";
 import {
   MapPin,
@@ -12,10 +11,11 @@ import {
   Settings2,
   Signal,
   RefreshCw,
+  User,
 } from "lucide-react";
 import { Rarity } from "../Achievements/constants";
 import { useState } from "react";
-import { AchievementTests } from "@/components/Tests/AchievementTests";
+import { DockTests } from "@/components/Tests/DockTests";
 import { useSocket } from "@/contexts/SocketContext";
 import {
   Tooltip,
@@ -23,6 +23,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/UI/tooltip";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface MainLayoutProps {
   onToggle3D: () => void;
@@ -46,12 +47,9 @@ export default function MainLayout({
   isPingDisabled,
 }: MainLayoutProps) {
   const [showTestMenu, setShowTestMenu] = useState(false);
+  const [showAuth, setShowAuth] = useState(false);
   const { remainingCooldown, connectToSocket, isConnecting } = useSocket();
-
-  const handleTestClick = (rarity: Rarity) => {
-    onTestAchievement(rarity);
-    setShowTestMenu(false);
-  };
+  const { isAuthenticated } = useAuthContext();
 
   const items = [
     {
@@ -103,6 +101,13 @@ export default function MainLayout({
         "bg-gradient-to-br from-yellow-500 via-amber-500 to-orange-500 hover:from-yellow-400 hover:via-amber-400 hover:to-orange-400 shadow-lg shadow-yellow-500/25 border-none",
     },
     {
+      label: "Login",
+      icon: <User size={32} color="#fff" strokeWidth={1.5} />,
+      onClick: () => setShowAuth(true),
+      className:
+        "bg-gradient-to-br from-blue-500 via-cyan-500 to-sky-500 hover:from-blue-400 hover:via-cyan-400 hover:to-sky-400 shadow-lg shadow-blue-500/25 border-none",
+    },
+    {
       label: "Test",
       icon: <Settings2 size={32} color="#fff" strokeWidth={1.5} />,
       onClick: () => setShowTestMenu(true),
@@ -113,7 +118,6 @@ export default function MainLayout({
 
   return (
     <>
-      {/* Connection Status */}
       <div className="absolute top-5 left-5 z-1000">
         <div className="flex flex-row items-center gap-3 rounded-lg border border-black/20 bg-black/10 px-4 py-2 text-sm text-black backdrop-blur-md">
           <TooltipProvider>
@@ -152,13 +156,29 @@ export default function MainLayout({
         </div>
       </div>
 
-      {/* Test Achievement Selection Menu */}
       {showTestMenu && (
-        <AchievementTests
-          onTestClick={handleTestClick}
+        <DockTests
+          onTestAchievement={onTestAchievement}
           onClose={() => setShowTestMenu(false)}
         />
       )}
+
+      {showAuth &&
+        (!isAuthenticated ? (
+          <Auth onClose={() => setShowAuth(false)} />
+        ) : (
+          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/50">
+            <div className="rounded-lg bg-white p-6 shadow-lg">
+              <p className="mb-4 text-gray-700">You are already logged in.</p>
+              <button
+                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
+                onClick={() => setShowAuth(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        ))}
 
       <Dock
         items={items}
@@ -168,7 +188,6 @@ export default function MainLayout({
         baseItemSize={60}
         panelHeight={80}
       />
-      {/* <Auth /> */}
     </>
   );
 }

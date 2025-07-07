@@ -24,22 +24,22 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isConnecting, setIsConnecting] = useState(false);
 
   const connectToSocket = () => {
-    if (isConnecting || isConnected) {
-      console.log("Already connecting to socket");
-      return; 
-    }
+    if (isConnecting || isConnected) return;
     setIsConnecting(true);
+
+    //TODO: make sure accessToken is valid before connecting
     let tempUserId = localStorage.getItem("tempUserId");
+    const accessToken = localStorage.getItem("accessToken");
     if (!tempUserId) {
       tempUserId = crypto.randomUUID();
       localStorage.setItem("tempUserId", tempUserId);
     }
 
-    socketService.connect(tempUserId);
+    socketService.connect(accessToken || "", tempUserId);
     const checkConnection = setInterval(() => {
       setIsConnected(socketService.isConnected);
       setSocketId(socketService.socketId);
-    }, 1000);
+    }, 500);
 
     return () => {
       clearInterval(checkConnection);

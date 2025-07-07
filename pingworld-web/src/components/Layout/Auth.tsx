@@ -1,5 +1,9 @@
 import { LoginForm } from "@/components/UI/auth/login-form";
 
-export default function Auth() {
-  return <LoginForm />;
+interface AuthProps {
+  onClose: () => void;
+}
+
+export default function Auth({ onClose }: AuthProps) {
+  return <LoginForm onClose={onClose} />;
 }
