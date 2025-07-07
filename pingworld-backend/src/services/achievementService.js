@@ -86,9 +86,7 @@ export async function checkAndAwardAchievements(pingData, io, userName) {
         (await prisma.userAchievement.count({ where: { achievement_id: achievement.id } })) > 0;
 
       if (!alreadyAwardedGlobally) {
-        console.log(`~ Not awarded globally yet. count: ${JSON.stringify(achievement.criteria)}`);
         const globalTotalPings = await getGlobalPingCount();
-        console.log(`globalTotalPings: ${globalTotalPings}`);
         if (globalTotalPings >= achievementCount) {
           shouldAward = true;
         }

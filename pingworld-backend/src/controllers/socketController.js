@@ -5,14 +5,16 @@ import ApiResponse from "../models/apiResponse.js";
 import determineUserIp from "../utils/determineUserIp.js";
 
 export async function handleNewPing(socket, io) {
-  console.log(`Received newPing from ${socket.id}:`);
   try {
     const userId = socket.user ? socket.user.id : null;
     const tempUserId = !socket.user && socket.temp_user_id ? socket.temp_user_id : null;
     const userIp = determineUserIp(socket);
     const userName = socket?.user?.user_name || "Anonymous";
+
+    console.log(`New Ping from - userId: ${userId || "N/A"}, tempUserId: ${tempUserId || "N/A"}`);
     let latitude, longitude, country, continent;
 
+    // TODO: Cache user location based on IP to avoid repeated lookups
     if (userIp) {
       ({ latitude, longitude, country, continent } = locateUserLocation(userIp));
     } else {

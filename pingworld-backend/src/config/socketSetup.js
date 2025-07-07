@@ -8,19 +8,21 @@ import determineUserIp from "../utils/determineUserIp.js";
 import { getGlobalPingCount } from "../services/achievementService.js";
 
 export function setupSocketIO(httpServer) {
+  const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(",") : [];
   const io = new Server(httpServer, {
     cors: {
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: allowedOrigins.length > 0 ? allowedOrigins : "http://localhost:3000",
       methods: ["GET", "POST"],
     },
   });
 
   io.use(async (socket, next) => {
-    const token = socket.handshake.auth.token;
+    const accessToken = socket.handshake.auth.accessToken;
     const tempUserIdFromClient = socket.handshake.auth.tempUserId;
-    if (token) {
+
+    if (accessToken) {
       try {
-        const decoded = jsonwebtoken.verify(token, process.env.JWT_ACCESS_SECRET_KEY);
+        const decoded = jsonwebtoken.verify(accessToken, process.env.JWT_ACCESS_SECRET_KEY);
         const user = await fetchAndValidateUserForToken(decoded.id, decoded.iat);
         socket.user = user;
       } catch (err) {
@@ -34,11 +36,11 @@ export function setupSocketIO(httpServer) {
 
   io.on("connection", async (socket) => {
     if (socket.user) {
-      console.log(`Authenticated user.id "${socket.user.id}" connected: ${socket.id}`);
+      console.log(`Authenticated user.id "${socket.user.id}", Socket ID: ${socket.id}`);
     } else if (socket.temp_user_id) {
-      console.log(`Anonymous user (tempId: ${socket.temp_user_id}) connected: ${socket.id}`);
+      console.log(`Anonymous user (tempId: ${socket.temp_user_id}) (Socket ID: ${socket.id}) connected.`);
     } else {
-      console.log(`Anonymous user connected: ${socket.id}`);
+      console.log(`Anonymous user (Socket ID: ${socket.id}) connected.`);
     }
 
     const userIp = determineUserIp(socket);
@@ -59,11 +61,6 @@ export function setupSocketIO(httpServer) {
 
     socket.on("disconnect", () => {
       console.log(`User disconnected: ${socket.id}`);
-    });
-
-    // Log any other events
-    socket.onAny((event, ...args) => {
-      console.log(`Event "${event}" received from ${socket.id} with args:`, args);
     });
   });
 

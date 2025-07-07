@@ -9,7 +9,7 @@ function errorMiddleware(error, req, res, next) {
       success: error.success,
       data: error.data,
       error: error.error,
-      status_code: status,
+      status: status,
     });
   } else {
     // Fallback for other types of errors
@@ -19,7 +19,7 @@ function errorMiddleware(error, req, res, next) {
       error: {
         message: error.message,
       },
-      status_code: status,
+      status: status,
     });
   }
 }

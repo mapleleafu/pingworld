@@ -21,9 +21,17 @@ async function generateRefreshToken(payload) {
 function setRefreshTokenCookie(res, refreshToken) {
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: isProduction,
-    sameSite: "Lax",
+    secure: true,
+    sameSite: isProduction ? "Lax" : "None",
     maxAge: ms(process.env.JWT_REFRESH_EXPIRES_IN || "180d"),
+  });
+}
+
+function clearRefreshTokenCookie(res) {
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+    secure: true,
+    sameSite: isProduction ? "Lax" : "None",
   });
 }
 
@@ -154,4 +162,5 @@ export {
   refreshUserTokens,
   fetchAndValidateUserForToken,
   getUserById,
+  clearRefreshTokenCookie,
 };

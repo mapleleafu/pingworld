@@ -1,5 +1,5 @@
 import ApiResponse from "../models/apiResponse.js";
-import { registerUser, loginUser, setRefreshTokenCookie, refreshUserTokens, getUserById } from "../services/authService.js";
+import { registerUser, loginUser, setRefreshTokenCookie, refreshUserTokens, getUserById, clearRefreshTokenCookie } from "../services/authService.js";
 
 const login = async (req, res, next) => {
   try {
@@ -52,4 +52,9 @@ const profile = async (req, res, next) => {
   res.json(ApiResponse.Success({ message: "Successfully retrieved the user.", user }));
 };
 
-export { login, register, profile, handleRefreshToken };
+const logout = async (req, res) => {
+  clearRefreshTokenCookie(res);
+  res.json(ApiResponse.Success({ message: "Successfully logged out." }));
+};
+
+export { login, register, profile, handleRefreshToken, logout };

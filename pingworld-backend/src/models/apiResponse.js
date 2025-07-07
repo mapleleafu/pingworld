@@ -7,11 +7,11 @@ import {
 } from "../helper/customError.js";
 
 class ApiResponse {
-  constructor(success, data, error, statusCode) {
+  constructor(success, data, error, status) {
     this.setSuccess(success);
     this.setData(data);
     this.setError(error);
-    this.setStatusCode(statusCode);
+    this.setStatus(status);
   }
 
   setSuccess(success) {
@@ -37,11 +37,11 @@ class ApiResponse {
     this.error = error;
   }
 
-  setStatusCode(statusCode) {
-    if (statusCode !== null && typeof statusCode !== "number") {
-      throw new Error("Status Code must be either a number or null");
+  setStatus(status) {
+    if (status !== null && typeof status !== "number") {
+      throw new Error("Status must be either a number or null");
     }
-    this.status_code = statusCode;
+    this.status = status;
   }
 
   static Success(data) {
