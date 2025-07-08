@@ -45,8 +45,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const payload = JSON.parse(atob(token.split(".")[1]));
       const expirationTime = payload.exp * 1000;
       const currentTime = Date.now();
-      // const refreshTime = expirationTime - currentTime - 60000; // 1 minute buffer
-      const refreshTime = expirationTime - currentTime; //? TEST LINE: No buffer
+      const refreshTime = expirationTime - currentTime - 60000; // 1 minute buffer
 
       if (refreshTime > 0) {
         refreshTimeoutRef.current = setTimeout(() => {
@@ -76,6 +75,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (refreshTimeoutRef.current) {
       clearTimeout(refreshTimeoutRef.current);
     }
+    setIsLoading(false);
   }, []);
 
   // Listen for logout events from API client
@@ -90,7 +90,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const initializeAuth = async () => {
       try {
         const response = await authService.refresh();
-        scheduleTokenRefresh(response.data.accessToken);
+        const accessToken = response.data.accessToken;
+        localStorage.setItem("accessToken", accessToken);
+        scheduleTokenRefresh(accessToken);
 
         const userData = getUser();
         if (userData) {
@@ -102,7 +104,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(user);
         }
       } catch (error) {
-        // Token invalid, clear everything
         clearAuth();
       }
 

@@ -10,6 +10,7 @@ import {
   LogoutResponse,
 } from "@/types/auth";
 import { toast } from "sonner";
+import { useSocket } from "@/contexts/SocketContext";
 
 export interface UseAuthReturn {
   login: (data: LoginRequest) => Promise<LoginResponse>;
@@ -25,6 +26,7 @@ export const useAuth = (): UseAuthReturn => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { setUser, clearAuth } = useAuthContext();
+  const { reconnectToSocket } = useSocket();
 
   const login = useCallback(
     async ({ email, password }: LoginRequest) => {
@@ -37,9 +39,7 @@ export const useAuth = (): UseAuthReturn => {
         localStorage.setItem("user", JSON.stringify(user));
         localStorage.setItem("accessToken", accessToken);
         setUser(user);
-
-        //TODO: reset the WS connection using accessToken
-
+        reconnectToSocket(); // Reconnect with new token
         return response;
       } catch (err: any) {
         setError(err.message);

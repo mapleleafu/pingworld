@@ -37,12 +37,13 @@ export default function MapComponent() {
   const animationRef = useRef<number | null>(null);
   const mapInstanceRef = useRef<Map | null>(null);
   const [is3DEnabled, setIs3DEnabled] = useState(
-    MapConstants.INITIAL_3D_ENABLED,
+    localStorage.getItem("3DEnabled") === "true" || MapConstants.INITIAL_3D_ENABLED,
   );
   const { activePings } = usePings();
   const { sendPing, isConnected, isPingDisabled } = useSocket();
-  const [isFollowPings, setIsFollowPings] = useState(
-    MapConstants.INITIAL_FOLLOW_PINGS,
+  const [isFollowPings, setIsFollowPings] = useState<boolean>(
+    localStorage.getItem("followPings") === "true" ||
+      MapConstants.INITIAL_FOLLOW_PINGS,
   );
   const isFollowPingsRef = useRef(isFollowPings);
   const [isMapAnimating, setIsMapAnimating] = useState(false);
@@ -270,6 +271,7 @@ export default function MapComponent() {
   const toggle3D = () => {
     setIsMapLoading(true);
     const current = olCesiumRef.current?.getEnabled();
+    localStorage.setItem("3DEnabled", JSON.stringify(!current));
     olCesiumRef.current?.setEnabled(!current);
     setIs3DEnabled(!current);
 
@@ -311,6 +313,7 @@ export default function MapComponent() {
   const onToggleFollowPings = () => {
     setIsFollowPings((prev) => {
       const newValue = !prev;
+      localStorage.setItem("followPings", JSON.stringify(newValue));
       if (!newValue) {
         animationQueueRef.current = [];
         mapInstanceRef.current?.getView().cancelAnimations();

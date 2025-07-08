@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import socketService from "@/services/socket/socketService";
 import { PING_COOLDOWN_DURATION } from "@/components/Map/constants";
+import { useAuthContext } from "@/contexts/AuthContext";
 
 interface SocketContextType {
   isConnected: boolean;
@@ -9,6 +10,7 @@ interface SocketContextType {
   isPingDisabled: boolean;
   remainingCooldown: number;
   connectToSocket: () => void;
+  reconnectToSocket: () => void;
   isConnecting: boolean;
 }
 
@@ -22,23 +24,31 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
   const [isPingDisabled, setIsPingDisabled] = useState(false);
   const [remainingCooldown, setRemainingCooldown] = useState(0);
   const [isConnecting, setIsConnecting] = useState(false);
+  const { isLoading, isAuthenticated } = useAuthContext();
 
   const connectToSocket = () => {
-    if (isConnecting || isConnected) return;
-    setIsConnecting(true);
+    if (isConnecting || isConnected || isLoading) return;
 
-    //TODO: make sure accessToken is valid before connecting
+    setIsConnecting(true);
     let tempUserId = localStorage.getItem("tempUserId");
     const accessToken = localStorage.getItem("accessToken");
+
     if (!tempUserId) {
       tempUserId = crypto.randomUUID();
       localStorage.setItem("tempUserId", tempUserId);
     }
 
     socketService.connect(accessToken || "", tempUserId);
+
     const checkConnection = setInterval(() => {
-      setIsConnected(socketService.isConnected);
+      const connected = socketService.isConnected;
+      setIsConnected(connected);
       setSocketId(socketService.socketId);
+
+      if (connected) {
+        clearInterval(checkConnection);
+        setIsConnecting(false);
+      }
     }, 500);
 
     return () => {
@@ -48,9 +58,18 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   };
 
+  const reconnectToSocket = () => {
+    socketService.disconnect();
+    setIsConnected(false);
+    setSocketId(undefined);
+    setIsConnecting(false);
+
+    setTimeout(() => connectToSocket(), 100);
+  };
+
   useEffect(() => {
-    connectToSocket();
-  }, []);
+    if (!isLoading) connectToSocket();
+  }, [isLoading, isAuthenticated]);
 
   const sendPing = () => {
     setIsPingDisabled(true);
@@ -79,6 +98,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({
         isPingDisabled,
         remainingCooldown,
         isConnecting,
+        reconnectToSocket,
       }}
     >
       {children}
