@@ -23,6 +23,8 @@ export type DockItemData = {
   label: React.ReactNode;
   onClick: () => void;
   className?: string;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
 };
 
 export type DockProps = {
@@ -40,6 +42,8 @@ type DockItemProps = {
   className?: string;
   children: React.ReactNode;
   onClick?: () => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   mouseX: MotionValue;
   spring: SpringOptions;
   distance: number;
@@ -51,6 +55,8 @@ function DockItem({
   children,
   className = "",
   onClick,
+  onMouseEnter,
+  onMouseLeave,
   mouseX,
   spring,
   distance,
@@ -87,6 +93,8 @@ function DockItem({
       onFocus={() => isHovered.set(1)}
       onBlur={() => isHovered.set(0)}
       onClick={onClick}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       className={`relative inline-flex items-center justify-center rounded-full border-2 border-neutral-700 bg-[#060010] shadow-md ${className}`}
       tabIndex={0}
       role="button"
@@ -190,6 +198,8 @@ export default function Dock({
           <DockItem
             key={index}
             onClick={item.onClick}
+            onMouseEnter={item.onMouseEnter}
+            onMouseLeave={item.onMouseLeave}
             className={item.className}
             mouseX={mouseX}
             spring={spring}

@@ -1,6 +1,8 @@
-interface ApiResponse {
+export interface ApiResponse {
   success: boolean;
-  data?: any;
+  data?: {
+    message?: string;
+  };
   error?: string;
   status?: number;
 }
@@ -12,7 +14,7 @@ export class ApiError extends Error {
   public status?: number;
 
   constructor(errorData: ApiResponse) {
-    super(errorData.error || 'An error occurred');
+    super(errorData.error || "An error occurred");
     this.success = errorData.success;
     this.data = errorData.data;
     this.error = errorData.error;

@@ -8,9 +8,11 @@ import {
   RegisterResponse,
   RefreshResponse,
   LogoutResponse,
+  PasswordChangeRequest,
 } from "@/types/auth";
 import { toast } from "sonner";
 import { useSocket } from "@/contexts/SocketContext";
+import { ApiResponse } from "@/types/api";
 
 export interface UseAuthReturn {
   login: (data: LoginRequest) => Promise<LoginResponse>;
@@ -18,6 +20,7 @@ export interface UseAuthReturn {
   logout: () => Promise<LogoutResponse>;
   profile: () => Promise<RegisterResponse>;
   refresh: () => Promise<RefreshResponse>;
+  passwordChange: (data: PasswordChangeRequest) => Promise<ApiResponse>;
   error: string | null;
   isLoading: boolean;
 }
@@ -56,10 +59,13 @@ export const useAuth = (): UseAuthReturn => {
     setIsLoading(true);
     setError(null);
     try {
-      return await authService.logout();
-    } catch (error) {
-      console.error("Logout error:", error);
-      return { success: false, error: "Logout failed", status: 500, data: {} };
+      const response = await authService.logout();
+      toast.success("Successfully logged out!");
+      return response;
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(err.message || "Logout failed");
+      throw err;
     } finally {
       clearAuth();
     }
@@ -94,7 +100,7 @@ export const useAuth = (): UseAuthReturn => {
         toast.error(err.message || "Registration failed");
         throw err;
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
     },
     [setUser],
@@ -120,5 +126,30 @@ export const useAuth = (): UseAuthReturn => {
     }
   }, [setUser]);
 
-  return { login, logout, isLoading, error, register, profile, refresh };
+  const passwordChange = useCallback(async (data: PasswordChangeRequest) => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await authService.passwordChange(data);
+      toast.success("Password changed successfully!");
+      return response;
+    } catch (err: any) {
+      setError(err.message);
+      toast.error(err.message || "Password change failed");
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  return {
+    login,
+    logout,
+    isLoading,
+    error,
+    register,
+    profile,
+    refresh,
+    passwordChange,
+  };
 };

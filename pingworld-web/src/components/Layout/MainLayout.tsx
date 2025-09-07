@@ -1,5 +1,6 @@
+import profileBackground from "@/assets/images/user-profile-background.jpg";
 import Auth from "@/components/Layout/Auth";
-import Dock from "@/blocks/Components/Dock/Dock";
+import { Dock } from "@/blocks";
 import {
   MapPin,
   MapPinOff,
@@ -12,7 +13,9 @@ import {
   Signal,
   RefreshCw,
   User,
+  X,
 } from "lucide-react";
+import { Loader } from "@/components/UI/Loader";
 import { Rarity } from "../Achievements/constants";
 import { useState } from "react";
 import { DockTests } from "@/components/Tests/DockTests";
@@ -24,6 +27,10 @@ import {
   TooltipTrigger,
 } from "@/components/UI/tooltip";
 import { useAuthContext } from "@/contexts/AuthContext";
+import { Noise, TiltedCard } from "@/blocks";
+import { useAuth } from "@/hooks/useAuth";
+import { validator } from "@/services/validator";
+import { toast } from "sonner";
 
 interface MainLayoutProps {
   onToggle3D: () => void;
@@ -49,7 +56,53 @@ export default function MainLayout({
   const [showTestMenu, setShowTestMenu] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const { remainingCooldown, connectToSocket, isConnecting } = useSocket();
-  const { isAuthenticated } = useAuthContext();
+  const { isAuthenticated, isLoading, user } = useAuthContext();
+  const { logout, passwordChange } = useAuth();
+  const [isPasswordMode, setIsPasswordMode] = useState(false);
+  const [formData, setFormData] = useState({
+    oldPassword: "",
+    newPassword: "",
+    newPasswordConfirm: "",
+  });
+
+  const validate = () => {
+    const errors = validator.validate(formData, {
+      oldPassword: { required: true, minLength: 6 },
+      newPassword: { required: true, minLength: 6 },
+      newPasswordConfirm: { required: true, minLength: 6 },
+    });
+
+    if (errors.length > 0) {
+      errors.forEach((err) => toast.error(err));
+      return false;
+    }
+    return true;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
+    try {
+      await passwordChange({
+        oldPassword: formData.oldPassword,
+        newPassword: formData.newPassword,
+        newPasswordConfirm: formData.newPasswordConfirm,
+      });
+      setFormData({
+        oldPassword: "",
+        newPassword: "",
+        newPasswordConfirm: "",
+      });
+      setShowAuth(false);
+    } catch (error) {}
+  };
 
   const items = [
     {
@@ -101,7 +154,7 @@ export default function MainLayout({
         "bg-gradient-to-br from-yellow-500 via-amber-500 to-orange-500 hover:from-yellow-400 hover:via-amber-400 hover:to-orange-400 shadow-lg shadow-yellow-500/25 border-none",
     },
     {
-      label: "Login",
+      label: `${isAuthenticated ? "Profile" : "Login"}`,
       icon: <User size={32} color="#fff" strokeWidth={1.5} />,
       onClick: () => setShowAuth(true),
       className:
@@ -164,19 +217,130 @@ export default function MainLayout({
       )}
 
       {showAuth &&
-        (!isAuthenticated ? (
+        (isLoading ? (
+          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/50">
+            <Loader />
+          </div>
+        ) : !isAuthenticated ? (
           <Auth onClose={() => setShowAuth(false)} />
         ) : (
-          <div className="fixed inset-0 z-1000 flex items-center justify-center bg-black/50">
-            <div className="rounded-lg bg-white p-6 shadow-lg">
-              <p className="mb-4 text-gray-700">You are already logged in.</p>
-              <button
-                className="rounded bg-blue-500 px-4 py-2 text-white hover:bg-blue-600"
-                onClick={() => setShowAuth(false)}
-              >
-                Close
-              </button>
-            </div>
+          <div
+            className="fixed inset-0 z-1000 flex items-center justify-center bg-black/50"
+            onClick={(e) => {
+              if (e.target === e.currentTarget) {
+                setShowAuth(false);
+              }
+            }}
+          >
+            <TiltedCard
+              imageSrc={profileBackground}
+              altText="Profile Background"
+              containerHeight={400}
+              containerWidth={320}
+              imageHeight={400}
+              imageWidth={320}
+              rotateAmplitude={20}
+              scaleOnHover={1.15}
+              showMobileWarning={true}
+              showTooltip={false}
+              displayOverlayContent={true}
+              overlayContent={
+                <div className="flex h-full w-full flex-col items-center justify-between gap-2 rounded-[15px] bg-black/40 p-6 backdrop-blur-sm">
+                  {!isPasswordMode ? (
+                    <>
+                      {/* Profile Section */}
+                      <div className="flex w-full flex-col items-center">
+                        <button
+                          className="absolute top-2 right-2 cursor-pointer text-white"
+                          onClick={() => setShowAuth(false)}
+                        >
+                          <X size={20} />
+                        </button>
+                        <input
+                          type="text"
+                          placeholder="Username"
+                          defaultValue={user?.user_name || ""}
+                          className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-white/60 focus:border-white/40 focus:outline-none"
+                        />
+                      </div>
+
+                      <div className="flex w-full flex-col gap-2">
+                        <button
+                          onClick={() => setIsPasswordMode(true)}
+                          className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white transition-colors hover:bg-white/20"
+                        >
+                          Change Password
+                        </button>
+                        <button
+                          className="rounded-lg bg-red-800 px-3 py-2 text-sm text-white transition-colors hover:bg-red-700"
+                          onClick={() => {
+                            logout();
+                            setShowAuth(false);
+                          }}
+                        >
+                          Logout
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <form
+                        onSubmit={handleSubmit}
+                        className="flex h-full w-full flex-col items-center justify-between gap-2 rounded-[15px] p-6 backdrop-blur-sm"
+                      >
+                        {/* Password Section */}
+                        <button
+                          className="absolute top-2 right-2 cursor-pointer text-white"
+                          onClick={() => setShowAuth(false)}
+                        >
+                          <X size={20} />
+                        </button>
+                        <div className="flex w-full flex-col gap-4">
+                          <input
+                            type="password"
+                            placeholder="Current Password"
+                            name="oldPassword"
+                            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-white/60 focus:border-white/40 focus:outline-none"
+                            onChange={handleChange}
+                          />
+                          <input
+                            type="password"
+                            placeholder="New Password"
+                            name="newPassword"
+                            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-white/60 focus:border-white/40 focus:outline-none"
+                            onChange={handleChange}
+                          />
+                          <input
+                            type="password"
+                            placeholder="Confirm New Password"
+                            name="newPasswordConfirm"
+                            className="w-full rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder-white/60 focus:border-white/40 focus:outline-none"
+                            onChange={handleChange}
+                          />
+                        </div>
+
+                        <div className="flex w-full gap-2">
+                          <button
+                            onClick={() => setIsPasswordMode(false)}
+                            className="flex-1 rounded-lg border border-white/20 bg-white/10 px-3 py-2 text-sm text-white transition-colors hover:bg-white/20"
+                          >
+                            Back
+                          </button>
+                          <button
+                            type="submit"
+                            disabled={isLoading}
+                            className="flex-1 rounded-lg bg-slate-900 px-3 py-2 text-sm text-white transition-colors hover:bg-slate-800"
+                          >
+                            {isLoading ? <Loader /> : "Update"}
+                          </button>
+                        </div>
+                      </form>
+                    </>
+                  )}
+                </div>
+              }
+            />
+            <Noise />
           </div>
         ))}
 

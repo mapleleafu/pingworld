@@ -10,6 +10,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
       "@blocks": path.resolve(__dirname, "./src/blocks"),
       "@UI": path.resolve(__dirname, "./src/components/UI"),
+      "@public": path.resolve(__dirname, "./public"),
     },
   },
 });

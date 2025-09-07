@@ -1,10 +1,12 @@
 import { apiClient } from "@/services/api/clientService";
+import { ApiResponse } from "@/types/api";
 import {
   LoginResponse,
   LoginRequest,
   RegisterRequest,
   RegisterResponse,
   LogoutResponse,
+  PasswordChangeRequest,
 } from "@/types/auth";
 
 export const authService = {
@@ -22,4 +24,7 @@ export const authService = {
 
   profile: (): Promise<RegisterResponse> =>
     apiClient.get("profile"),
+
+  passwordChange: (data: PasswordChangeRequest): Promise<ApiResponse> =>
+    apiClient.post("password/change", data),
 };

@@ -15,6 +15,12 @@ export interface RegisterRequest {
   password: string;
 }
 
+export interface PasswordChangeRequest {
+  oldPassword: string;
+  newPassword: string;
+  newPasswordConfirm: string;
+}
+
 export interface RegisterResponse {
   data: {
     user: User;
