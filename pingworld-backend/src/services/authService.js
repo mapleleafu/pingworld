@@ -153,6 +153,24 @@ async function getUserById(userId) {
   });
 }
 
+async function changeUserPassword(userId, oldPassword, newPassword, newPasswordConfirm) {
+  const user = await prisma.user.findUnique({ where: { id: userId } });
+  if (!user) throw ApiResponse.NotFoundError("User not found.");
+
+  if (newPassword !== newPasswordConfirm) throw ApiResponse.BadRequestError("New passwords do not match.");
+  
+  const isOldPasswordMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isOldPasswordMatch) throw ApiResponse.BadRequestError("Old password is incorrect.");
+
+  const saltRounds = parseInt(process.env.SALT_ROUNDS || "10", 10);
+  const hashedNewPassword = await bcrypt.hash(newPassword, saltRounds);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password: hashedNewPassword },
+  });
+}
+
 export {
   loginUser,
   registerUser,
@@ -163,4 +181,5 @@ export {
   fetchAndValidateUserForToken,
   getUserById,
   clearRefreshTokenCookie,
+  changeUserPassword
 };

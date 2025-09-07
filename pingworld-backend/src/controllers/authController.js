@@ -1,5 +1,5 @@
 import ApiResponse from "../models/apiResponse.js";
-import { registerUser, loginUser, setRefreshTokenCookie, refreshUserTokens, getUserById, clearRefreshTokenCookie } from "../services/authService.js";
+import { registerUser, loginUser, setRefreshTokenCookie, refreshUserTokens, getUserById, clearRefreshTokenCookie, changeUserPassword } from "../services/authService.js";
 
 const login = async (req, res, next) => {
   try {
@@ -54,7 +54,19 @@ const profile = async (req, res, next) => {
 
 const logout = async (req, res) => {
   clearRefreshTokenCookie(res);
+  console.log(`User ${req.user.id} logged out.`);
   res.json(ApiResponse.Success({ message: "Successfully logged out." }));
 };
 
-export { login, register, profile, handleRefreshToken, logout };
+const changePassword = async (req, res, next) => {
+  const { oldPassword, newPassword, newPasswordConfirm } = req.body;
+
+  try {
+    await changeUserPassword(req.user.id, oldPassword, newPassword, newPasswordConfirm);
+    res.json(ApiResponse.Success({ message: "Password changed successfully." }));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export { login, register, profile, handleRefreshToken, logout, changePassword };

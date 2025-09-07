@@ -21,3 +21,11 @@ export const loginSchema = z.object({
       .max(256, { message: "Password must be at most 256 characters long." }),
   }),
 });
+
+export const changePasswordSchema = z.object({
+  body: z.object({
+    oldPassword: z.string({ required_error: "Old password is required." }).min(6).max(256),
+    newPassword: z.string({ required_error: "New password is required." }).min(6).max(256),
+    newPasswordConfirm: z.string({ required_error: "New password confirmation is required." }).min(6).max(256),
+  }),
+});
